@@ -206,8 +206,12 @@ def analyze_cv():
 
         # Call Claude API - Import ici pour éviter les problèmes de proxies au démarrage
         try:
+            import httpx
             from anthropic import Anthropic
-            client = Anthropic(api_key=api_key)
+            
+            # Créer un client HTTP sans proxy
+            http_client = httpx.Client(proxies=None)
+            client = Anthropic(api_key=api_key, http_client=http_client)
         except Exception as e:
             return jsonify({
                 'error': f'Erreur initialisation Claude: {str(e)}',
