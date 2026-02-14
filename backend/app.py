@@ -4,7 +4,7 @@ IAMonJob Web Application Backend
 Provides API endpoints for CV analysis using Claude API with the IAMonJob skill
 """
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import anthropic
 import os
@@ -17,29 +17,6 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/')
-def index():
-    return jsonify({
-        'name': 'IAMonJob V3 API',
-        'version': '3.0.0',
-        'status': 'running',
-        'endpoints': {
-            'health': '/api/health',
-            'modules': '/api/modules',
-            'analyze': '/api/analyze (POST)'
-        },
-        'documentation': 'https://github.com/DoukyDPA/iamonjobv3'
-    })
-from flask import send_from_directory
-
-@app.route('/')
-def serve_frontend():
-    return send_from_directory('../frontend', 'index.html')
-
-@app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory('../frontend', path)
-    
 # Configuration
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
@@ -69,6 +46,19 @@ def get_media_type(filename):
         'txt': 'text/plain'
     }
     return media_types.get(ext, 'application/octet-stream')
+
+@app.route('/')
+def serve_frontend():
+    """Serve the frontend HTML"""
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files from frontend"""
+    try:
+        return send_from_directory('../frontend', path)
+    except:
+        return send_from_directory('../frontend', 'index.html')
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
