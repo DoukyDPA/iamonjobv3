@@ -30,6 +30,15 @@ def index():
         },
         'documentation': 'https://github.com/DoukyDPA/iamonjobv3'
     })
+from flask import send_from_directory
+
+@app.route('/')
+def serve_frontend():
+    return send_from_directory('../frontend', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('../frontend', path)
     
 # Configuration
 UPLOAD_FOLDER = 'uploads'
