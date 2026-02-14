@@ -17,6 +17,20 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def index():
+    return jsonify({
+        'name': 'IAMonJob V3 API',
+        'version': '3.0.0',
+        'status': 'running',
+        'endpoints': {
+            'health': '/api/health',
+            'modules': '/api/modules',
+            'analyze': '/api/analyze (POST)'
+        },
+        'documentation': 'https://github.com/DoukyDPA/iamonjobv3'
+    })
+    
 # Configuration
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
