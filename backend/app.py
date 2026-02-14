@@ -50,14 +50,7 @@ def serve_frontend():
     """Serve the frontend HTML"""
     return send_from_directory('../frontend', 'index.html')
 
-@app.route('/<path:path>')
-def serve_static(path):
-    """Serve static files from frontend"""
-    try:
-        return send_from_directory('../frontend', path)
-    except:
-        return send_from_directory('../frontend', 'index.html')
-
+# Routes API AVANT la route catch-all
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
@@ -65,6 +58,40 @@ def health_check():
         'status': 'ok',
         'timestamp': datetime.now().isoformat()
     })
+
+@app.route('/api/modules', methods=['GET'])
+def get_modules():
+    """Get available IAMonJob modules"""
+    modules = {
+        'cv_only': [
+            {'id': 1, 'name': 'Analyse du CV', 'description': 'Analyse complète avec forces et faiblesses'},
+            {'id': 2, 'name': 'Tableau des compétences', 'description': 'Matrices hard skills et soft skills'},
+            {'id': 3, 'name': 'Notation et améliorations', 'description': 'Note /10 et plan d\'amélioration'},
+            {'id': 4, 'name': 'Évolutions professionnelles', 'description': 'Pistes de reconversion et évolution'}
+        ],
+        'cv_and_offer': [
+            {'id': 5, 'name': 'Gap Analysis', 'description': 'Écarts CV vs poste ciblé'},
+            {'id': 6, 'name': 'Optimisation ATS', 'description': 'Mots-clés et compatibilité ATS'},
+            {'id': 7, 'name': 'Lettre de motivation', 'description': 'Draft personnalisé'},
+            {'id': 8, 'name': 'Pitch "Parlez-moi de vous"', 'description': 'Versions 30s, 2-3min, 5min'},
+            {'id': 9, 'name': 'Dans la tête du recruteur', 'description': 'Récit narratif du recruteur'},
+            {'id': 10, 'name': 'Questions d\'entretien', 'description': '12 questions types avec réponses'},
+            {'id': 11, 'name': 'Veille entreprise', 'description': 'Fiche sur l\'entreprise cible'}
+        ]
+    }
+    return jsonify(modules)
+
+# Route catch-all EN DERNIER (après toutes les routes API)
+@app.route('/<path:path>')
+def serve_static(path):
+    """Serve static files from frontend"""
+    # Ne pas intercepter les routes API
+    if path.startswith('api/'):
+        return jsonify({'error': 'API endpoint not found'}), 404
+    try:
+        return send_from_directory('../frontend', path)
+    except:
+        return send_from_directory('../frontend', 'index.html')
 
 @app.route('/api/analyze', methods=['POST'])
 def analyze_cv():
@@ -231,28 +258,6 @@ def analyze_cv():
                 os.remove(job_path)
             except:
                 pass
-
-@app.route('/api/modules', methods=['GET'])
-def get_modules():
-    """Get available IAMonJob modules"""
-    modules = {
-        'cv_only': [
-            {'id': 1, 'name': 'Analyse du CV', 'description': 'Analyse complète avec forces et faiblesses'},
-            {'id': 2, 'name': 'Tableau des compétences', 'description': 'Matrices hard skills et soft skills'},
-            {'id': 3, 'name': 'Notation et améliorations', 'description': 'Note /10 et plan d\'amélioration'},
-            {'id': 4, 'name': 'Évolutions professionnelles', 'description': 'Pistes de reconversion et évolution'}
-        ],
-        'cv_and_offer': [
-            {'id': 5, 'name': 'Gap Analysis', 'description': 'Écarts CV vs poste ciblé'},
-            {'id': 6, 'name': 'Optimisation ATS', 'description': 'Mots-clés et compatibilité ATS'},
-            {'id': 7, 'name': 'Lettre de motivation', 'description': 'Draft personnalisé'},
-            {'id': 8, 'name': 'Pitch "Parlez-moi de vous"', 'description': 'Versions 30s, 2-3min, 5min'},
-            {'id': 9, 'name': 'Dans la tête du recruteur', 'description': 'Récit narratif du recruteur'},
-            {'id': 10, 'name': 'Questions d\'entretien', 'description': '12 questions types avec réponses'},
-            {'id': 11, 'name': 'Veille entreprise', 'description': 'Fiche sur l\'entreprise cible'}
-        ]
-    }
-    return jsonify(modules)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
