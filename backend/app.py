@@ -216,7 +216,7 @@ def analyze_cv():
         
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
-            max_tokens=16000,
+            max_tokens=8000,  # Réduit pour accélérer
             messages=[{
                 "role": "user",
                 "content": message_content
