@@ -6,11 +6,9 @@ Provides API endpoints for CV analysis using Claude API with the IAMonJob skill
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
-import anthropic
 import os
 import json
 from datetime import datetime
-import tempfile
 import base64
 from werkzeug.utils import secure_filename
 
@@ -73,6 +71,9 @@ def analyze_cv():
     """
     Analyze CV with optional job offer using Claude API + IAMonJob skill
     """
+    cv_path = None
+    job_path = None
+    
     try:
         # Get API key from request or environment
         api_key = request.form.get('api_key') or os.environ.get('ANTHROPIC_API_KEY')
@@ -176,8 +177,15 @@ def analyze_cv():
             "text": prompt
         })
 
-        # Call Claude API
-        client = anthropic.Anthropic(api_key=api_key)
+        # Call Claude API - Import ici pour éviter les problèmes de proxies au démarrage
+        try:
+            from anthropic import Anthropic
+            client = Anthropic(api_key=api_key)
+        except Exception as e:
+            return jsonify({
+                'error': f'Erreur initialisation Claude: {str(e)}',
+                'type': 'init_error'
+            }), 500
         
         response = client.messages.create(
             model="claude-sonnet-4-5-20250929",
@@ -190,14 +198,10 @@ def analyze_cv():
 
         # Extract the response
         result_text = ""
-        pdf_filename = None
         
         for block in response.content:
             if block.type == "text":
                 result_text += block.text + "\n"
-
-        # Note: In production, you'd need to handle the actual PDF generation
-        # For this demo, we return the analysis text
         
         return jsonify({
             'success': True,
@@ -207,21 +211,24 @@ def analyze_cv():
             'job_offer_included': bool(job_offer)
         })
 
-    except anthropic.APIError as e:
-        return jsonify({
-            'error': f'Claude API error: {str(e)}',
-            'type': 'api_error'
-        }), 500
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
         return jsonify({
             'error': f'Server error: {str(e)}',
-            'type': 'server_error'
+            'type': 'server_error',
+            'details': error_details if os.environ.get('FLASK_ENV') == 'development' else None
         }), 500
     finally:
         # Cleanup uploaded files
-        if 'cv_path' in locals() and os.path.exists(cv_path):
+        if cv_path and os.path.exists(cv_path):
             try:
                 os.remove(cv_path)
+            except:
+                pass
+        if job_path and os.path.exists(job_path):
+            try:
+                os.remove(job_path)
             except:
                 pass
 
