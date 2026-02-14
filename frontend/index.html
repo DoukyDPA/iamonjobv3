@@ -326,19 +326,9 @@
         </div>
 
         <div class="card">
-            <div class="info-box">
-                <strong>ℹ️ Information :</strong> Pour utiliser cette application, vous devez avoir une clé API Claude d'Anthropic. 
-                <a href="https://console.anthropic.com/" target="_blank" style="color: #1976d2;">Obtenir une clé API</a>
-            </div>
-
             <div class="error" id="error"></div>
 
             <form id="analysisForm">
-                <div class="form-group">
-                    <label for="apiKey">🔑 Clé API Claude (Anthropic)</label>
-                    <input type="password" id="apiKey" placeholder="sk-ant-..." required>
-                </div>
-
                 <div class="form-group">
                     <label>📄 CV (obligatoire)</label>
                     <div class="file-upload" id="cvUpload">
@@ -508,7 +498,6 @@
             
             try {
                 const formData = new FormData();
-                formData.append('api_key', document.getElementById('apiKey').value);
                 formData.append('cv', document.getElementById('cvFile').files[0]);
                 
                 const jobFile = document.getElementById('jobFile').files[0];
