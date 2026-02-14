@@ -400,7 +400,8 @@
     </div>
 
     <script>
-        const API_URL = 'https://iamonjobv3-production.up.railway.app/api';
+        // Utilise le même domaine (pas de CORS)
+        const API_URL = '/api';
         
         // File upload handlers
         function setupFileUpload(uploadDivId, fileInputId, fileNameDivId) {
