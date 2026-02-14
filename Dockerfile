@@ -21,5 +21,5 @@ ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
 
-# Run the application with gunicorn
-CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --access-logfile - --error-logfile - app:app
+# Run the application with gunicorn - TIMEOUT 180s pour les analyses longues
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 180 --graceful-timeout 180 --keep-alive 5 --access-logfile - --error-logfile - app:app
